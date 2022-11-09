@@ -1,7 +1,5 @@
 # GoBank
 
-## About the project
-
 GoBank is a simple application written in Go language to manage bank accounts. For now we are able to create/delete accounts, pull them all or by the ID and make a bank transfer.
 
 ## Technologies
