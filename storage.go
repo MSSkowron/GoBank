@@ -13,6 +13,7 @@ type Storage interface {
 	UpdateAccount(*Account) error
 	GetAccounts() ([]*Account, error)
 	GetAccountByID(int) (*Account, error)
+	Transfer(int64, int64) error
 }
 
 type PostgresStore struct {
@@ -121,4 +122,16 @@ func (s *PostgresStore) GetAccountByID(id int) (*Account, error) {
 	log.Println("[POSTGRES] Account correctly pulled from database.")
 
 	return account, nil
+}
+
+func (s *PostgresStore) Transfer(accountNumber, amount int64) error {
+	query := `update account set balance = balance + $1 where number = $2`
+
+	if _, err := s.db.Exec(query, amount, accountNumber); err != nil {
+		return err
+	}
+
+	log.Printf("[POSTGRES] Account's balance with number %d was changed by  %d", accountNumber, amount)
+
+	return nil
 }

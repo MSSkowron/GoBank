@@ -4,6 +4,11 @@ import (
 	"math/rand"
 	"time"
 )
+ 
+type TransferRequest struct {
+	AccountNumber int64 `json:"accountNumber"`
+	Amount        int64 `json:"amount"`
+}
 
 type CreateAccountRequest struct {
 	FirstName string `json:"firstName"`

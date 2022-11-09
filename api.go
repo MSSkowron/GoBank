@@ -42,8 +42,8 @@ func (s *APIServer) Run() {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/account", makeHTTPHandleFunc(s.handleAccount))
-
 	router.HandleFunc("/account/{id}", makeHTTPHandleFunc(s.handleAccountByID))
+	router.HandleFunc("/transfer", makeHTTPHandleFunc(s.handleTransfer))
 
 	log.Println("[API] Server running on port:", s.listenAddr[1:])
 
@@ -135,6 +135,25 @@ func (s *APIServer) handleDeleteAccountByID(w http.ResponseWriter, r *http.Reque
 	}
 
 	return WriteJSON(w, http.StatusOK, map[string]int{"deleted": id})
+}
+
+// POST /transfer
+func (s *APIServer) handleTransfer(w http.ResponseWriter, r *http.Request) error {
+	if r.Method != "POST" {
+		return fmt.Errorf("[API] Method %s is not supported by the API/transfer", r.Method)
+	}
+
+	transferRequest := TransferRequest{}
+	if err := json.NewDecoder(r.Body).Decode(&transferRequest); err != nil {
+		return err
+	}
+	defer r.Body.Close()
+
+	if err := s.storage.Transfer(transferRequest.AccountNumber, transferRequest.Amount); err != nil {
+		return err
+	}
+
+	return WriteJSON(w, http.StatusOK, transferRequest)
 }
 
 func getIDFromRequest(r *http.Request) (int, error) {
