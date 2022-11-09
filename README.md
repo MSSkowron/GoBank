@@ -23,10 +23,6 @@ What we need to have installed in order to run the application:
 
 `git clone github.com/MSSkowron/GoBank`
 
-    or
-
-`go get github.com/MSSkowron/GoBank`
-
 ## How to run
 
 `make run`
