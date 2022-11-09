@@ -1,8 +1,13 @@
-build:
-	@go build -o bin/gobank
+BINARY_NAME='gobank'
 
-run: build 
-	@./bin/gobank 
+docker:
+	@docker-compose up --detach
+
+build:
+	@go build -o bin/${BINARY_NAME}
+
+run: docker build 
+	@./bin/${BINARY_NAME}
 
 test: 
 	@go test -v ./...

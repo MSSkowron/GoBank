@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -26,15 +27,16 @@ func (s *APIServer) Run() {
 
 	router.HandleFunc("/account", makeHTTPHandleFunc(s.handleAccount))
 
-	router.HandleFunc("/account/{id}", makeHTTPHandleFunc(s.handleGetAccountByID))
+	router.HandleFunc("/account/{id}", makeHTTPHandleFunc(s.handleAccountByID))
 
-	log.Println("JSON API server running on port: ", s.listenAddr)
+	log.Println("[API] Server running on port:", s.listenAddr[1:])
 
 	if err := http.ListenAndServe(s.listenAddr, router); err != nil {
 		panic("Error while running APIServer: " + err.Error())
 	}
 }
 
+// handler /account
 func (s *APIServer) handleAccount(w http.ResponseWriter, r *http.Request) error {
 	if r.Method == "GET" {
 		return s.handleGetAccount(w, r)
@@ -42,11 +44,8 @@ func (s *APIServer) handleAccount(w http.ResponseWriter, r *http.Request) error 
 	if r.Method == "POST" {
 		return s.handleCreateAccount(w, r)
 	}
-	if r.Method == "DELETE" {
-		return s.handleDeleteAccount(w, r)
-	}
 
-	return fmt.Errorf("Method %s is not supported by the JSON APIServer", r.Method)
+	return fmt.Errorf("Method %s is not supported by the API/account", r.Method)
 }
 
 // GET /account
@@ -75,15 +74,52 @@ func (s *APIServer) handleCreateAccount(w http.ResponseWriter, r *http.Request) 
 	return WriteJSON(w, http.StatusOK, account)
 }
 
-// GET /account/{id}
-func (s *APIServer) handleGetAccountByID(w http.ResponseWriter, r *http.Request) error {
-	id := mux.Vars(r)["id"]
+// handler /account/{id}
+func (s *APIServer) handleAccountByID(w http.ResponseWriter, r *http.Request) error {
+	if r.Method == "GET" {
+		return s.handleGetAccountByID(w, r)
+	}
+	if r.Method == "DELETE" {
+		return s.handleDeleteAccountByID(w, r)
+	}
 
-	return WriteJSON(w, http.StatusOK, NewAccount("firstname"+id, "lastname"))
+	return fmt.Errorf("Method %s is not supported by the API/account/{id}", r.Method)
 }
 
-func (s *APIServer) handleDeleteAccount(w http.ResponseWriter, r *http.Request) error {
-	return nil
+// GET /account/{id}
+func (s *APIServer) handleGetAccountByID(w http.ResponseWriter, r *http.Request) error {
+	id, err := strconv.Atoi(mux.Vars(r)["id"])
+	if err != nil {
+		return err
+	}
+
+	account, err := s.storage.GetAccountByID(id)
+	if err != nil {
+		return err
+	}
+
+	return WriteJSON(w, http.StatusOK, Account{
+		ID:        account.ID,
+		FirstName: account.FirstName,
+		LastName:  account.LastName,
+		Number:    account.Number,
+		Balance:   account.Balance,
+		CreatedAt: account.CreatedAt,
+	})
+}
+
+// DELETE /account/{id}
+func (s *APIServer) handleDeleteAccountByID(w http.ResponseWriter, r *http.Request) error {
+	id, err := strconv.Atoi(mux.Vars(r)["id"])
+	if err != nil {
+		return err
+	}
+
+	if err := s.storage.DeleteAccount(id); err != nil {
+		return err
+	}
+
+	return WriteJSON(w, http.StatusOK, "")
 }
 
 func (s *APIServer) handleTransfer(w http.ResponseWriter, r *http.Request) error {

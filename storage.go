@@ -20,7 +20,7 @@ type PostgresStore struct {
 }
 
 func NewPostgresStore() (*PostgresStore, error) {
-	connStr := "user=postgres dbname=postgres password=gobank sslmode=disable"
+	connStr := "user=gobank-postgres-user dbname=postgres password=gobank-postgres-password sslmode=disable"
 
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
@@ -31,9 +31,12 @@ func NewPostgresStore() (*PostgresStore, error) {
 		return nil, err
 	}
 
-	return &PostgresStore{
-		db: db,
-	}, nil
+	postgresStore := &PostgresStore{db: db}
+	if err := postgresStore.Init(); err != nil {
+		return nil, err
+	}
+
+	return postgresStore, nil
 }
 
 func (s *PostgresStore) Init() error {
@@ -62,7 +65,7 @@ func (s *PostgresStore) CreateAccount(a *Account) error {
 		return err
 	}
 
-	log.Println("Account correctly inserted to DB")
+	log.Println("[POSTGRES] Account correctly inserted to database.")
 
 	return err
 }
@@ -97,5 +100,14 @@ func (s *PostgresStore) GetAccounts() ([]*Account, error) {
 }
 
 func (s *PostgresStore) GetAccountByID(id int) (*Account, error) {
-	return nil, nil
+	query := `select * from account where id=$1`
+
+	row := s.db.QueryRow(query, id)
+
+	account := &Account{}
+	if err := row.Scan(&account.ID, &account.FirstName, &account.LastName, &account.Number, &account.Balance, &account.CreatedAt); err != nil {
+		return nil, err
+	}
+
+	return account, nil
 }
