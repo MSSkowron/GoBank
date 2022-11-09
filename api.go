@@ -103,7 +103,7 @@ func (s *APIServer) handleAccountByID(w http.ResponseWriter, r *http.Request) er
 
 // GET /account/{id}
 func (s *APIServer) handleGetAccountByID(w http.ResponseWriter, r *http.Request) error {
-	id, err := strconv.Atoi(mux.Vars(r)["id"])
+	id, err := getIDFromRequest(r)
 	if err != nil {
 		return err
 	}
@@ -125,7 +125,7 @@ func (s *APIServer) handleGetAccountByID(w http.ResponseWriter, r *http.Request)
 
 // DELETE /account/{id}
 func (s *APIServer) handleDeleteAccountByID(w http.ResponseWriter, r *http.Request) error {
-	id, err := strconv.Atoi(mux.Vars(r)["id"])
+	id, err := getIDFromRequest(r)
 	if err != nil {
 		return err
 	}
@@ -134,7 +134,18 @@ func (s *APIServer) handleDeleteAccountByID(w http.ResponseWriter, r *http.Reque
 		return err
 	}
 
-	return WriteJSON(w, http.StatusOK, "")
+	return WriteJSON(w, http.StatusOK, map[string]int{"deleted": id})
+}
+
+func getIDFromRequest(r *http.Request) (int, error) {
+	idStr := mux.Vars(r)["id"]
+
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		return -1, fmt.Errorf("Invalid account ID given %s", idStr)
+	}
+
+	return id, nil
 }
 
 func WriteJSON(w http.ResponseWriter, status int, v any) error {
