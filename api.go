@@ -15,6 +15,20 @@ type APIServer struct {
 	storage    Storage
 }
 
+type APIError struct {
+	Error string
+}
+
+type apiFunc func(http.ResponseWriter, *http.Request) error
+
+func makeHTTPHandleFunc(f apiFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if err := f(w, r); err != nil {
+			WriteJSON(w, http.StatusBadRequest, APIError{Error: err.Error()})
+		}
+	}
+}
+
 func NewAPIServer(listenAddr string, storage Storage) *APIServer {
 	return &APIServer{
 		listenAddr: listenAddr,
@@ -32,7 +46,7 @@ func (s *APIServer) Run() {
 	log.Println("[API] Server running on port:", s.listenAddr[1:])
 
 	if err := http.ListenAndServe(s.listenAddr, router); err != nil {
-		panic("Error while running APIServer: " + err.Error())
+		log.Fatal("[API] Error while running APIServer: " + err.Error())
 	}
 }
 
@@ -45,7 +59,7 @@ func (s *APIServer) handleAccount(w http.ResponseWriter, r *http.Request) error 
 		return s.handleCreateAccount(w, r)
 	}
 
-	return fmt.Errorf("Method %s is not supported by the API/account", r.Method)
+	return fmt.Errorf("[API] Method %s is not supported by the API/account", r.Method)
 }
 
 // GET /account
@@ -66,7 +80,6 @@ func (s *APIServer) handleCreateAccount(w http.ResponseWriter, r *http.Request) 
 	}
 
 	account := NewAccount(createAccountReq.FirstName, createAccountReq.LastName)
-
 	if err := s.storage.CreateAccount(account); err != nil {
 		return err
 	}
@@ -83,7 +96,7 @@ func (s *APIServer) handleAccountByID(w http.ResponseWriter, r *http.Request) er
 		return s.handleDeleteAccountByID(w, r)
 	}
 
-	return fmt.Errorf("Method %s is not supported by the API/account/{id}", r.Method)
+	return fmt.Errorf("[API] Method %s is not supported by the API/account/{id}", r.Method)
 }
 
 // GET /account/{id}
@@ -124,20 +137,6 @@ func (s *APIServer) handleDeleteAccountByID(w http.ResponseWriter, r *http.Reque
 
 func (s *APIServer) handleTransfer(w http.ResponseWriter, r *http.Request) error {
 	return nil
-}
-
-type apiFunc func(http.ResponseWriter, *http.Request) error
-
-type APIError struct {
-	Error string
-}
-
-func makeHTTPHandleFunc(f apiFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if err := f(w, r); err != nil {
-			WriteJSON(w, http.StatusBadRequest, APIError{Error: err.Error()})
-		}
-	}
 }
 
 func WriteJSON(w http.ResponseWriter, status int, v any) error {
