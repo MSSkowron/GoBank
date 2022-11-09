@@ -4,7 +4,7 @@ import (
 	"math/rand"
 	"time"
 )
- 
+
 type TransferRequest struct {
 	AccountNumber int64 `json:"accountNumber"`
 	Amount        int64 `json:"amount"`
@@ -28,7 +28,7 @@ func NewAccount(firstName, lastName string) *Account {
 	return &Account{
 		FirstName: firstName,
 		LastName:  lastName,
-		Number:    int64(rand.Intn(1000000)),
+		Number:    int64(rand.Intn(1000000000000000000)),
 		CreatedAt: time.Now().UTC(),
 	}
 }
