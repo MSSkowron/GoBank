@@ -2,7 +2,7 @@
 
 ## About the project
 
-GoBank is a simple application to manage bank accounts. For now we are able to create/delete accounts, pull them all or by the ID and make a bank transfer. I'm going to create a simple CLI app to use the application easier.
+GoBank is a simple application written in Go language to manage bank accounts. For now we are able to create/delete accounts, pull them all or by the ID and make a bank transfer.
 
 ## Technologies
 
@@ -19,10 +19,13 @@ What we need to have installed in order to run the application:
 - Make
 - Docker
 
-## Installing
+## Installation
 
-`git clone github.com/MSSkowron/GoBank`
+`git clone git@github.com:MSSkowron/GoBank.git`
 
 ## How to run
 
-`make run`
+```
+cd GoBank
+make run
+```
