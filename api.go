@@ -135,10 +135,6 @@ func (s *APIServer) handleDeleteAccountByID(w http.ResponseWriter, r *http.Reque
 	return WriteJSON(w, http.StatusOK, "")
 }
 
-func (s *APIServer) handleTransfer(w http.ResponseWriter, r *http.Request) error {
-	return nil
-}
-
 func WriteJSON(w http.ResponseWriter, status int, v any) error {
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(status)

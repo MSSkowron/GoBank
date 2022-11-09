@@ -103,6 +103,8 @@ func (s *PostgresStore) GetAccounts() ([]*Account, error) {
 		accounts = append(accounts, account)
 	}
 
+	log.Println("[POSTGRES] Accounts correctly pulled from database.")
+
 	return accounts, nil
 }
 
@@ -115,6 +117,8 @@ func (s *PostgresStore) GetAccountByID(id int) (*Account, error) {
 	if err := row.Scan(&account.ID, &account.FirstName, &account.LastName, &account.Number, &account.Balance, &account.CreatedAt); err != nil {
 		return nil, err
 	}
+
+	log.Println("[POSTGRES] Account correctly pulled from database.")
 
 	return account, nil
 }
