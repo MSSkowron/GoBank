@@ -2,7 +2,7 @@
 
 ## About the project
 
-GoBank is a simple application to manage bank accounts. For now we are able to both create/delete accounts and pull them all or by the ID.
+GoBank is a simple application to manage bank accounts. For now we are able to create/delete accounts, pull them all or by the ID and make a bank transfer.
 
 ## Technologies
 
