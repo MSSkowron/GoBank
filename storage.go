@@ -60,17 +60,24 @@ func (s *PostgresStore) createAccountTable() error {
 func (s *PostgresStore) CreateAccount(a *Account) error {
 	query := `insert into account (first_name, last_name, number, balance, created_at) values ($1, $2, $3, $4, $5)`
 
-	_, err := s.db.Exec(query, a.FirstName, a.LastName, a.Number, a.Balance, a.CreatedAt)
-	if err != nil {
+	if _, err := s.db.Exec(query, a.FirstName, a.LastName, a.Number, a.Balance, a.CreatedAt); err != nil {
 		return err
 	}
 
 	log.Println("[POSTGRES] Account correctly inserted to database.")
 
-	return err
+	return nil
 }
 
 func (s *PostgresStore) DeleteAccount(id int) error {
+	query := `delete from account where id=$1`
+
+	if _, err := s.db.Exec(query, id); err != nil {
+		return err
+	}
+
+	log.Println("[POSTGRES] Account correctly deleted from database.")
+
 	return nil
 }
 
